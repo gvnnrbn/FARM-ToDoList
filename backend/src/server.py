@@ -5,6 +5,8 @@ import sys
 
 from bson import ObjectId
 from fastapi import FastAPI, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
 import uvicorn
@@ -43,6 +45,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, debug=DEBUG)
 
+origins = [
+    "http://localhost:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/api/lists")
 async def get_all_lists() -> list[ListSummary]:
@@ -115,6 +128,9 @@ async def set_checked_state(list_id: str, update: ToDoItemUpdate) -> ToDoList:
 async def root():
     return {"message": "Hello, FastAPI!"}
 
+@app.get("/favicon.ico")
+async def favicon():
+    return Response(status_code=204)
 
 def main(argv=sys.argv[1:]):
     try:
