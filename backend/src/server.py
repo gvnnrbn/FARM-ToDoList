@@ -4,7 +4,7 @@ import os
 import sys
 
 from bson import ObjectId
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -73,6 +73,8 @@ class NewListResponse(BaseModel):
 
 @app.post("/api/lists", status_code=status.HTTP_201_CREATED)
 async def create_todo_list(new_list: NewList) -> NewListResponse:
+    if new_list.name == "":
+        HTTPException(status_code=404, detail="Empty name") 
     return NewListResponse(
         id=await app.todo_dal.create_todo_list(new_list.name),
         name=new_list.name,
