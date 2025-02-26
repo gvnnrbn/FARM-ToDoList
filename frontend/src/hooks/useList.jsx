@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchLists, createList, deleteList } from '../services/api';
+import { fetchLists, fetchOneList, createList, deleteList, setCheckedState } from '../services/api';
 
 // GET LISTS
 export const useGetLists = () => {
@@ -11,8 +11,7 @@ export const useGetLists = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-          const response = await fetch('http://0.0.0.0:3001/api/lists');
-          const lists = await response.json();
+          const lists = await fetchLists();
           setData(lists);
       } catch (err) {
           setIsError(true);
@@ -70,4 +69,31 @@ export const useDeleteList = () => {
     };
 
     return { mutate, isSuccess, isError, error };
+};
+
+// GET ONE LIST
+export const useGetOneList = (list_id) => {
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+        const list = await fetchOneList(list_id);
+        setData(list);
+    } catch (err) {
+        setIsError(true);
+        setError(err.message);
+    } finally {
+        setIsLoading(false);
+    }
+};
+
+useEffect(() => {
+  fetchData();
+}, []);
+
+return { data, isLoading, isError, error, refetch: fetchData };
 };
